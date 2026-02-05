@@ -25,13 +25,13 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping
+    @GetMapping("/id")
     public ResponseEntity<UserResponseDTO> getUserById(@RequestParam Integer id) {
         User user  = userService.getUserById(id);
         return ResponseEntity.ok(UserResponseDTO.fromEntity(user));
     }
 
-    @GetMapping
+    @GetMapping("/email")
     public ResponseEntity<UserResponseDTO> getUserByEmail(@RequestParam String email) {
         User user  = userService.getUserByEmail(email);
         return ResponseEntity.ok(UserResponseDTO.fromEntity(user));
