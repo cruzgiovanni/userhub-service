@@ -1,6 +1,6 @@
 package com.cruzgiovanni.userhub_service.dto.response;
 
-import com.cruzgiovanni.userhub_service.infrastructure.entitys.User;
+import com.cruzgiovanni.userhub_service.infrastructure.entities.User;
 import lombok.*;
 
 @Getter

@@ -1,4 +1,4 @@
-package com.cruzgiovanni.userhub_service.infrastructure.entitys;
+package com.cruzgiovanni.userhub_service.infrastructure.entities;
 
 import jakarta.persistence.*;
 import lombok.*;

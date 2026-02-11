@@ -1,6 +1,6 @@
 package com.cruzgiovanni.userhub_service.infrastructure.repositories;
 
-import com.cruzgiovanni.userhub_service.infrastructure.entitys.User;
+import com.cruzgiovanni.userhub_service.infrastructure.entities.User;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

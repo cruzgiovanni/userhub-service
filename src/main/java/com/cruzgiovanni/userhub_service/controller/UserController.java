@@ -3,7 +3,7 @@ package com.cruzgiovanni.userhub_service.controller;
 import com.cruzgiovanni.userhub_service.business.UserService;
 import com.cruzgiovanni.userhub_service.dto.request.UserRequestDTO;
 import com.cruzgiovanni.userhub_service.dto.response.UserResponseDTO;
-import com.cruzgiovanni.userhub_service.infrastructure.entitys.User;
+import com.cruzgiovanni.userhub_service.infrastructure.entities.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,20 +25,20 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/id")
-    public ResponseEntity<UserResponseDTO> getUserById(@RequestParam Integer id) {
-        User user  = userService.getUserById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Integer id) {
+        User user = userService.getUserById(id);
         return ResponseEntity.ok(UserResponseDTO.fromEntity(user));
     }
 
-    @GetMapping("/email")
-    public ResponseEntity<UserResponseDTO> getUserByEmail(@RequestParam String email) {
+    @GetMapping("/email/{email}")
+    public ResponseEntity<UserResponseDTO> getUserByEmail(@PathVariable String email) {
         User user  = userService.getUserByEmail(email);
         return ResponseEntity.ok(UserResponseDTO.fromEntity(user));
     }
 
-    @PutMapping
-    public ResponseEntity<UserRequestDTO> updateUserNameById(@RequestParam Integer id, @RequestBody UserRequestDTO request) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserRequestDTO> updateUserNameById(@PathVariable Integer id, @RequestBody UserRequestDTO request) {
         User user = User.builder()
                 .email(request.getEmail())
                 .name(request.getName())
@@ -47,8 +47,8 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping
-    public ResponseEntity<User> deleteUserByEmail(@RequestParam String email) {
+    @DeleteMapping("/{email}")
+    public ResponseEntity<User> deleteUserByEmail(@PathVariable String email) {
         userService.deleteUserByEmail(email);
         return ResponseEntity.ok().build();
     }
