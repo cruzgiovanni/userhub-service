@@ -1,6 +1,6 @@
 package com.cruzgiovanni.userhub_service.business;
 
-import com.cruzgiovanni.userhub_service.infrastructure.entities.User;
+import com.cruzgiovanni.userhub_service.infrastructure.entities.User.User;
 import com.cruzgiovanni.userhub_service.infrastructure.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
