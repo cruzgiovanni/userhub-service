@@ -1,6 +1,6 @@
 package com.cruzgiovanni.userhub_service.controller;
 
-import com.cruzgiovanni.userhub_service.business.UserService;
+import com.cruzgiovanni.userhub_service.services.UserService;
 import com.cruzgiovanni.userhub_service.dto.request.UserRequestDTO;
 import com.cruzgiovanni.userhub_service.dto.response.UserResponseDTO;
 import com.cruzgiovanni.userhub_service.infrastructure.entities.User.User;

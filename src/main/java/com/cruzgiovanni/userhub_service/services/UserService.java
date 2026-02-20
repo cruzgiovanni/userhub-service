@@ -1,4 +1,4 @@
-package com.cruzgiovanni.userhub_service.business;
+package com.cruzgiovanni.userhub_service.services;
 
 import com.cruzgiovanni.userhub_service.infrastructure.entities.User.User;
 import com.cruzgiovanni.userhub_service.infrastructure.repositories.UserRepository;

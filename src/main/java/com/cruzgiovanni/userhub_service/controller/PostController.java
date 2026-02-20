@@ -1,6 +1,6 @@
 package com.cruzgiovanni.userhub_service.controller;
 
-import com.cruzgiovanni.userhub_service.business.PostService;
+import com.cruzgiovanni.userhub_service.services.PostService;
 import com.cruzgiovanni.userhub_service.dto.request.PostRequestDTO;
 import com.cruzgiovanni.userhub_service.dto.response.PostResponseDTO;
 import com.cruzgiovanni.userhub_service.infrastructure.entities.Post;
