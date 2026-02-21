@@ -1,6 +1,6 @@
-package com.cruzgiovanni.userhub_service.business;
+package com.cruzgiovanni.userhub_service.services;
 
-import com.cruzgiovanni.userhub_service.infrastructure.entitys.User;
+import com.cruzgiovanni.userhub_service.infrastructure.entities.User.User;
 import com.cruzgiovanni.userhub_service.infrastructure.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,12 +11,9 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public void saveUser(User user) {
-        userRepository.saveAndFlush(user);
-    }
-
     public User getUserById(Integer id) {
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id).orElseThrow(() ->
+                new RuntimeException("User with id " + id + " not found"));
     }
 
     public User getUserByEmail(String email) {

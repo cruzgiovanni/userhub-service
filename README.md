@@ -1,6 +1,6 @@
 # UserHub Service
 
-A RESTful API service for user management built with Spring Boot. This service provides endpoints for creating, reading, updating, and deleting user records.
+A RESTful API service for user management built with Spring Boot. This service provides endpoints for user authentication (register/login with JWT) and user/post management.
 
 ## Table of Contents
 
@@ -8,6 +8,7 @@ A RESTful API service for user management built with Spring Boot. This service p
 - [Architecture](#architecture)
 - [Project Structure](#project-structure)
 - [Dependencies](#dependencies)
+- [Security](#security)
 - [API Endpoints](#api-endpoints)
 - [Database](#database)
 - [Getting Started](#getting-started)
@@ -19,10 +20,12 @@ A RESTful API service for user management built with Spring Boot. This service p
 |------------|---------|
 | Java | 25 |
 | Spring Boot | 4.0.2 |
+| Spring Security | (managed by Spring Boot) |
 | H2 Database | 2.4.x |
 | Hibernate | 7.2.x |
 | Lombok | Latest |
 | Maven | 3.x |
+| java-jwt (Auth0) | 4.5.1 |
 
 ## Architecture
 
@@ -40,7 +43,7 @@ This project follows a **layered architecture** pattern, separating concerns int
 │              (Business logic, service classes)              │
 ├─────────────────────────────────────────────────────────────┤
 │                    Infrastructure Layer                     │
-│            (Entities, Repositories, DB access)              │
+│       (Entities, Repositories, Security, DB access)         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -61,36 +64,53 @@ This project follows a **layered architecture** pattern, separating concerns int
 #### Business Layer
 - Contains business logic and rules
 - Orchestrates operations between controllers and repositories
-- Handles transactions and data validation
-- Located in `business/` package
+- Located in `services/` package
 
 #### Infrastructure Layer
 - **Entities**: JPA entities representing database tables
 - **Repositories**: Spring Data JPA interfaces for database operations
-- Located in `infrastructure/entitys/` and `infrastructure/repositories/` packages
+- **Security**: JWT filter, token service, and security configuration
+- Located in `infrastructure/` package
 
 ## Project Structure
 
 ```
 src/main/java/com/cruzgiovanni/userhub_service/
-├── UserhubServiceApplication.java          # Application entry point
-├── business/
-│   └── UserService.java                    # User business logic
+├── UserhubServiceApplication.java
 ├── controller/
-│   └── UserController.java                 # REST API endpoints
+│   ├── AuthController.java          # Register and login endpoints
+│   ├── UserController.java          # User management endpoints
+│   └── PostController.java          # Post management endpoints
 ├── dto/
 │   ├── request/
-│   │   └── UserRequestDTO.java             # Input data structure
+│   │   ├── AuthDTO.java             # Login request (login + password)
+│   │   ├── RegisterDTO.java         # Register request (login, email, name, password, role)
+│   │   ├── UserRequestDTO.java      # User update request
+│   │   └── PostRequestDTO.java      # Post request
 │   └── response/
-│       └── UserResponseDTO.java            # Output data structure
+│       ├── LoginResponseDTO.java    # JWT token response
+│       ├── UserResponseDTO.java     # User response
+│       └── PostResponseDTO.java     # Post response
+├── services/
+│   ├── AuthService.java             # UserDetailsService implementation
+│   ├── UserService.java             # User business logic
+│   └── PostService.java             # Post business logic
 └── infrastructure/
-    ├── entitys/
-    │   └── User.java                       # JPA entity
-    └── repositories/
-        └── UserRepository.java             # Data access interface
+    ├── entities/
+    │   ├── User/
+    │   │   ├── User.java            # User JPA entity
+    │   │   └── UserRole.java        # ADMIN / USER enum
+    │   └── Post.java                # Post JPA entity
+    ├── repositories/
+    │   ├── UserRepository.java
+    │   └── PostRepository.java
+    └── security/
+        ├── SecurityConfiguration.java  # Filter chain and authorization rules
+        ├── SecurityFilter.java         # JWT token validation filter
+        └── TokenService.java           # JWT generation and validation
 
 src/main/resources/
-└── application.properties                   # Application configuration
+└── application.properties
 ```
 
 ## Dependencies
@@ -101,6 +121,8 @@ src/main/resources/
 |------------|---------|
 | `spring-boot-starter-webmvc` | Web MVC framework for building REST APIs |
 | `spring-boot-starter-data-jpa` | JPA support with Hibernate for database operations |
+| `spring-boot-starter-security` | Authentication and authorization |
+| `com.auth0:java-jwt` | JWT token generation and validation |
 | `spring-boot-h2console` | H2 database web console for development |
 | `h2` | In-memory database for development and testing |
 | `lombok` | Reduces boilerplate code (getters, setters, constructors, builders) |
@@ -111,6 +133,7 @@ src/main/resources/
 |------------|---------|
 | `spring-boot-starter-data-jpa-test` | Testing utilities for JPA repositories |
 | `spring-boot-starter-webmvc-test` | Testing utilities for web layer |
+| `spring-boot-starter-security-test` | Testing utilities for Spring Security |
 
 ### Lombok Annotations Used
 
@@ -122,23 +145,53 @@ src/main/resources/
 | `@RequiredArgsConstructor` | Generates constructor for final fields (used for dependency injection) |
 | `@Builder` | Implements the Builder pattern |
 
+## Security
+
+Authentication is handled via **JWT (JSON Web Token)**. The flow is:
+
+1. User registers via `POST /auth/register`
+2. User logs in via `POST /auth/login` and receives a JWT token
+3. All protected endpoints require the token in the `Authorization` header:
+
+```
+Authorization: Bearer <token>
+```
+
+### Roles
+
+| Role | Description |
+|------|-------------|
+| `USER` | Standard user with access to posts and profile |
+| `ADMIN` | Administrator role |
+
+### Endpoint Authorization
+
+| Endpoint | Access |
+|----------|--------|
+| `POST /auth/login` | Public |
+| `POST /auth/register` | Public |
+| `POST /post` | USER |
+| `GET /post/**` | USER |
+| `DELETE /post` | USER |
+| `PUT /user/**` | USER |
+| `DELETE /user` | USER |
+| All others | Authenticated |
+
 ## API Endpoints
 
-### Base URL
-```
-http://localhost:8080/user
-```
+### Auth
 
-### Endpoints
-
-#### Create User
+#### Register
 ```http
-POST /user
+POST /auth/register
 Content-Type: application/json
 
 {
-    "email": "user@example.com",
-    "name": "John Doe"
+    "login": "cruzgiovanni",
+    "email": "cruz@example.com",
+    "name": "Cruz Giovanni",
+    "password": "senha123",
+    "role": "USER"
 }
 ```
 
@@ -146,17 +199,41 @@ Content-Type: application/json
 
 ---
 
+#### Login
+```http
+POST /auth/login
+Content-Type: application/json
+
+{
+    "login": "cruzgiovanni",
+    "password": "senha123"
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+    "token": "<jwt-token>"
+}
+```
+
+---
+
+### User
+
+> All user endpoints require `Authorization: Bearer <token>`
+
 #### Get User by ID
 ```http
-GET /user/id?id={userId}
+GET /user/{id}
 ```
 
 **Response:**
 ```json
 {
     "id": 1,
-    "email": "user@example.com",
-    "name": "John Doe"
+    "email": "cruz@example.com",
+    "name": "Cruz Giovanni"
 }
 ```
 
@@ -164,15 +241,15 @@ GET /user/id?id={userId}
 
 #### Get User by Email
 ```http
-GET /user/email?email={userEmail}
+GET /user/email/{email}
 ```
 
 **Response:**
 ```json
 {
     "id": 1,
-    "email": "user@example.com",
-    "name": "John Doe"
+    "email": "cruz@example.com",
+    "name": "Cruz Giovanni"
 }
 ```
 
@@ -180,7 +257,7 @@ GET /user/email?email={userEmail}
 
 #### Update User
 ```http
-PUT /user?id={userId}
+PUT /user/{id}
 Content-Type: application/json
 
 {
@@ -195,10 +272,12 @@ Content-Type: application/json
 
 #### Delete User
 ```http
-DELETE /user?email={userEmail}
+DELETE /user/{email}
 ```
 
 **Response:** `200 OK`
+
+---
 
 ## Database
 
@@ -211,8 +290,11 @@ This project uses H2 as an in-memory database for development purposes. Data is 
 | Column | Type | Constraints |
 |--------|------|-------------|
 | `id` | INTEGER | PRIMARY KEY, AUTO_INCREMENT |
-| `email` | VARCHAR(255) | NOT NULL, UNIQUE |
+| `login` | VARCHAR(255) | NOT NULL, UNIQUE |
+| `email` | VARCHAR(255) | NOT NULL |
 | `name` | VARCHAR(255) | NOT NULL |
+| `password` | VARCHAR(255) | NOT NULL (BCrypt hashed) |
+| `role` | VARCHAR(50) | NOT NULL (`ADMIN` or `USER`) |
 
 ### H2 Console Access
 
@@ -271,7 +353,8 @@ mvn test
 | `spring.datasource.url` | Database connection URL | `jdbc:h2:mem:userhubdb` |
 | `spring.datasource.driverClassName` | JDBC driver class | `org.h2.Driver` |
 | `spring.datasource.username` | Database username | `sa` |
-| `spring.datasource.password` | Database password | *(empty)* |
+| `spring.datasource.password` | Database password | *(configured in properties)* |
+| `api.security.token.secret` | Secret key for JWT signing | *(configured in properties)* |
 
 ### Switching to a Production Database
 
