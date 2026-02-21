@@ -11,10 +11,6 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public void saveUser(User user) {
-        userRepository.saveAndFlush(user);
-    }
-
     public User getUserById(Integer id) {
         return userRepository.findById(id).orElseThrow(() ->
                 new RuntimeException("User with id " + id + " not found"));

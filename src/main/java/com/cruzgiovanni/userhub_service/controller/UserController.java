@@ -15,16 +15,6 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping
-    public ResponseEntity<UserRequestDTO> createUser(@RequestBody UserRequestDTO request) {
-        User user = User.builder()
-                .email(request.getEmail())
-                .name(request.getName())
-                .build();
-        userService.saveUser(user);
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Integer id) {
         User user = userService.getUserById(id);
