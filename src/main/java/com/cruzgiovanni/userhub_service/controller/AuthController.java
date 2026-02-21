@@ -2,8 +2,10 @@ package com.cruzgiovanni.userhub_service.controller;
 
 import com.cruzgiovanni.userhub_service.dto.request.AuthDTO;
 import com.cruzgiovanni.userhub_service.dto.request.RegisterDTO;
+import com.cruzgiovanni.userhub_service.dto.response.LoginResponseDTO;
 import com.cruzgiovanni.userhub_service.infrastructure.entities.User.User;
 import com.cruzgiovanni.userhub_service.infrastructure.repositories.UserRepository;
+import com.cruzgiovanni.userhub_service.infrastructure.security.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,12 +27,16 @@ public class AuthController {
 
     private final UserRepository userRepository;
 
+    private final TokenService tokenService;
+
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody @Validated AuthDTO data) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
         var auth = this.authenticationManager.authenticate(usernamePassword);
 
-        return ResponseEntity.ok().build();
+        var token = tokenService.generateToken((User) Objects.requireNonNull(auth.getPrincipal()));
+
+        return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
     @PostMapping("/register")
