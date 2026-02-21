@@ -13,7 +13,11 @@ public class PostService {
     private final PostRepository postRepository;
 
     public void createPost(Post post) {
-        postRepository.saveAndFlush(post);
+        if (post.getContent() != null && !post.getContent().trim().isEmpty()) {
+            postRepository.saveAndFlush(post);
+        } else {
+            throw new RuntimeException("Post content cannot be empty");
+        }
     }
 
     public Post getPostById (Integer id) {
